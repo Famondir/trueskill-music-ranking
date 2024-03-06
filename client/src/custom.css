@@ -1,0 +1,9 @@
+.card-img-top {
+    max-height: calc(50vh);
+    object-fit: cover;
+    object-position: 0 0;
+}
+
+.modal-height-limit {
+    max-height: calc(100vh - 160px);
+}
