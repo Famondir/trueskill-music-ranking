@@ -7,16 +7,27 @@ import datetime
 
 def prepare_song_rating():
     songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
-    songlist.insert(1, "Wertung", ttt.MU, True)
+    songlist.insert(1, "Wertung", pd.NA, True)
     songlist.insert(2, "Unsicherheit", ttt.SIGMA, True)
     
     competition_history = pd.read_csv("../trueskill_tt/vergleiche.csv")
+    comp =  [[[gewinner], [verlierer]] for gewinner, verlierer 
+             in zip(competition_history["Gewinner"], competition_history["Verlierer"])]
+    times = competition_history["Datum"].map(lambda string: 
+        (datetime.date.today()-datetime.datetime.strptime(string, "%Y-%m-%d").date()).days).to_list()
+    
+    h = ttt.History(comp, times=times, gamma=0.1)
+    h.convergence()
+    
+    for agent in h.agents:
+        temp = h.learning_curves()[agent][-1][1]
+        songlist.loc[songlist["Liedanfang"] == agent, ["Wertung", "Unsicherheit"]] = (temp.mu, temp.sigma)
     
     return songlist
 
 
 def generate_competition_queue():
-    competition_list = songlist.sort_values(by=["Wertung"])
+    competition_list = songlist.sort_values(by=["Unsicherheit"], ascending=False)
     # print(competition_list.iloc[0:5, 0:3])
     competition_list_1 = [title for idx, title in enumerate(competition_list["Liedanfang"].to_list()) if idx%2 == 0]
     competition_list_2 = [title for idx, title in enumerate(competition_list["Liedanfang"].to_list()) if idx%2 == 1]
@@ -53,9 +64,9 @@ def declare_competition_winner():
     winner = request.get_json()
     last_competition = competition_queue.pop(0)
     winner_index = 0 if last_competition[0] == winner else 1
-    competition_history = pd.read_csv("../trueskill_tt/vergleiche2.csv")
+    competition_history = pd.read_csv("../trueskill_tt/vergleiche.csv")
     competition_history.loc[len(competition_history)] = [datetime.date.today().strftime("%Y-%m-%d"), last_competition[winner_index], last_competition[not winner_index]]
-    competition_history.to_csv("../trueskill_tt/vergleiche2.csv", index=False)
+    competition_history.to_csv("../trueskill_tt/vergleiche.csv", index=False)
     return get_next_competition(), 201
 
 

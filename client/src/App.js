@@ -98,22 +98,38 @@ function App() {
     setData(newData)
   }
 
-  function SongCard({lied, quelle, seite}) {
+  function SongCard({lied, quelle, seite, video_src}) {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
+    const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
+
     return (
       <>
       <Card>
         <a href="#" onClick={handleShow}>
-          <Card.Img variant="top" src={"images/songs/"+lied.toLowerCase().replaceAll(",", "").replaceAll(" ", "_")+".png"} />
+          <Card.Img variant="top" src={image_src} />
         </a>
+        <Card.Header className="d-grid">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => post_winner(lied)}
+            >
+            {lied}
+          </Button>
+        </Card.Header>
         <CardBody>
-          <Card.Title>{lied}</Card.Title>
           <Card.Text>
-        
+            {(video_src === null) ? (
+                <p>Kein Videolink bereitgestellt.</p>
+              ) : (
+                <div>
+                  <iframe src={video_src} title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+                </div>
+              )}
           </Card.Text>
           <Table striped bordered hover>
               <tbody>
@@ -126,15 +142,7 @@ function App() {
               </tbody>
             </Table>
         </CardBody>
-        <Card.Footer className="d-grid">
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => post_winner(lied)}
-            >
-            {lied}
-          </Button>
-        </Card.Footer>
+        
       </Card>
 
       <Modal
@@ -148,7 +156,7 @@ function App() {
       <Modal.Body>
         <Image 
           variant="top" 
-          src={"images/songs/"+lied.toLowerCase().replaceAll(",", "").replaceAll(" ", "_")+".png"} 
+          src={image_src} 
           fluid
           className="modal-height-limit"
         />
@@ -177,12 +185,16 @@ function App() {
     ).then(
       data => {
         setData(data)
-        console.log(data)
+        // console.log(data)
       }
+    ).then(
+      get_song_rating()
+    ).then(
+      get_competition_history()
     )
   }
 
-  useEffect(() => {
+  async function get_competition_history() {
     fetch("/api/load_csv_as_dataframe/vergleiche.csv").then(
       res => {
         if (res.ok) {
@@ -196,9 +208,9 @@ function App() {
         // console.log(data)
       }
     )
-  }, [])
+  }
 
-  useEffect(() => {
+  async function get_song_rating() {
     fetch("/api/load_song_rating").then(
       res => {
         if (res.ok) {
@@ -212,6 +224,14 @@ function App() {
         // console.log(data)
       }
     )
+  }
+
+  useEffect(() => {
+    get_competition_history()
+  }, [])
+
+  useEffect(() => {
+    get_song_rating()
   }, [])
 
   useEffect(() => {
@@ -223,7 +243,7 @@ function App() {
       }
     ).then(
       data => {
-        console.log(data[0].Liedanfang)
+        // console.log(data)
         setData(data)
       }
     )
@@ -249,38 +269,17 @@ function App() {
                     lied={lied[0].Liedanfang}
                     quelle={lied[0].Quelle}
                     seite={lied[0].Seite}
+                    video_src={lied[0].Videolink}
                   />
                   <SongCard
                     lied={lied[1].Liedanfang}
                     quelle={lied[1].Quelle}
                     seite={lied[1].Seite}
+                    video_src={lied[1].Videolink}
                   />
                 </CardGroup>
               </div>
 
-            )}
-
-          </Row>
-        </Tab>
-        <Tab eventKey="competition-history" title="Rating history">
-          <Row id="competitionTable">
-
-            {(typeof competitionData === 'undefined') ? (
-              <p>Loading...</p>
-            ) : (
-              <div>
-                <div>
-                  <span>Suche Lied: </span><input type="text" onChange={handleCompetitionFilter}></input>
-                </div>
-                <DataTable
-                  columns={competitionColumns}
-                  data={competitionRecords}
-                  customStyles={customStyles}
-                  theme="light"
-                  fixedHeader
-                  pagination
-                ></DataTable>
-              </div>
             )}
 
           </Row>
@@ -298,6 +297,29 @@ function App() {
                 <DataTable
                   columns={songColumns}
                   data={songRecords}
+                  customStyles={customStyles}
+                  theme="light"
+                  fixedHeader
+                  pagination
+                ></DataTable>
+              </div>
+            )}
+
+          </Row>
+        </Tab>
+        <Tab eventKey="competition-history" title="Rating history">
+          <Row id="competitionTable">
+
+            {(typeof competitionData === 'undefined') ? (
+              <p>Loading...</p>
+            ) : (
+              <div>
+                <div>
+                  <span>Suche Lied: </span><input type="text" onChange={handleCompetitionFilter}></input>
+                </div>
+                <DataTable
+                  columns={competitionColumns}
+                  data={competitionRecords}
                   customStyles={customStyles}
                   theme="light"
                   fixedHeader
