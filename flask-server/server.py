@@ -5,7 +5,7 @@ import trueskillthroughtime as ttt
 import datetime
 
 
-def prepare_song_rating():
+def generate_song_rating():
     songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
     songlist.insert(1, "Wertung", pd.NA, True)
     songlist.insert(2, "Unsicherheit", ttt.SIGMA, True)
@@ -21,7 +21,7 @@ def prepare_song_rating():
     
     for agent in h.agents:
         temp = h.learning_curves()[agent][-1][1]
-        songlist.loc[songlist["Liedanfang"] == agent, ["Wertung", "Unsicherheit"]] = (temp.mu, temp.sigma)
+        songlist.loc[songlist["Liedanfang"] == agent, ["Wertung", "Unsicherheit"]] = (round(temp.mu, 3), round(temp.sigma, 3))
     
     return songlist
 
@@ -36,21 +36,26 @@ def generate_competition_queue():
     return competition_queue
 
 
-songlist = prepare_song_rating()
+songlist = generate_song_rating()
 competition_queue = generate_competition_queue()
 
 
 app = Flask(__name__)
 
 
-@app.route("/api/load_csv_as_dataframe/<string:filename>")
+""" @app.route("/api/load_csv_as_dataframe/<string:filename>")
 def read_csv_as_dataframe(filename):
-    return pd.read_csv("../trueskill_tt/"+filename).to_json(orient='records')
+    return pd.read_csv("../trueskill_tt/"+filename).to_json(orient='records') """
+
+@app.route("/api/load_competition_history")
+def read_csv_as_dataframe():
+    competition_history = pd.read_csv("../trueskill_tt/vergleiche.csv").iloc[::-1]
+    return competition_history.to_json(orient='records')
 
 
 @app.route("/api/load_song_rating")
 def load_song_rating():
-    songlist = prepare_song_rating()
+    songlist = generate_song_rating()
     return songlist.to_json(orient='records')
 
 

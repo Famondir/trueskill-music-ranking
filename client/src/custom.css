@@ -7,3 +7,7 @@
 .modal-height-limit {
     max-height: calc(100vh - 160px);
 }
+
+.responsiveVideoEmbedding {
+    aspect-ratio: 16 / 9;
+}

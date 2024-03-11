@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DataTable from 'react-data-table-component';
+import imageExists from "image-exists"
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './custom.css';
@@ -53,22 +54,38 @@ function App() {
     {
       name: 'Wertung',
       selector: row => row.Wertung,
-      sortable: true
+      sortable: true,
+      width: "10rem"
     },
     {
       name: 'Unsicherheit',
       selector: row => row.Unsicherheit,
-      sortable: true
+      sortable: true,
+      width: "12rem"
     },
     {
       name: 'Quelle',
       selector: row => row.Quelle,
-      sortable: true
+      sortable: true,
+      width: "12rem"
     },
     {
-      name: 'Seitenzahl',
+      name: 'Seite',
       selector: row => row.Seite,
-      sortable: true
+      sortable: true,
+      width: "8rem"
+    },
+    {
+      name: 'Noten',
+      selector: row => row.Liedanfang,
+      cell: row => BildModal(row.Liedanfang),
+      button: true,
+    },
+    {
+      name: 'Video',
+      selector: row => row.Videolink,
+      cell: row => VideoModal(row.Liedanfang, row.Videolink),
+      button: true,
     },
   ];
 
@@ -105,6 +122,7 @@ function App() {
     const handleShow = () => setShow(true);
 
     const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
+    // const image_src = "file:///C:/Users/schaefes/Documents/GitHub/pairwise_ranker/client/public/images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
 
     return (
       <>
@@ -122,15 +140,15 @@ function App() {
           </Button>
         </Card.Header>
         <CardBody>
-          <Card.Text>
-            {(video_src === null) ? (
-                <p>Kein Videolink bereitgestellt.</p>
-              ) : (
-                <div>
-                  <iframe src={video_src} title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
-                </div>
-              )}
-          </Card.Text>
+          {(video_src === null) ? (
+            <Card.Text>
+              Kein Videolink bereitgestellt.
+            </Card.Text>
+            ) : (
+              <div>
+                <iframe src={video_src} title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+              </div>
+            )}
           <Table striped bordered hover>
               <tbody>
                 <tr>
@@ -166,6 +184,84 @@ function App() {
     )
   }
 
+  function VideoModal(lied, video_src) {
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    return (
+      <>
+        {(video_src === null) ? (
+          <Button href="#" onClick={handleShow} disabled>Video</Button>
+        ) : (
+          <Button href="#" onClick={handleShow}>Video</Button>
+        )}
+
+        <Modal
+            show={show}
+            onHide={handleClose}
+            size="lg"
+          >
+          <Modal.Header closeButton>
+            <Modal.Title>{lied}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <iframe src={video_src} width="100%" className="responsiveVideoEmbedding" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
+          </Modal.Body>
+        </Modal>
+      </>
+    )
+  }
+
+  function BildModal(lied) {
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
+
+    const image_exists = imageExists(image_src, function(exists) {
+      if (exists) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    });
+
+    return (
+      <>
+        {(!image_exists) ? (
+          <Button href="#" onClick={handleShow} disabled>Noten</Button>
+        ) : (
+          <Button href="#" onClick={handleShow}>Noten</Button>
+        )}
+
+        <Modal
+            show={show}
+            onHide={handleClose}
+            size="lg"
+          >
+          <Modal.Header closeButton>
+            <Modal.Title>{lied}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Image 
+            variant="top" 
+            src={image_src} 
+            fluid
+            className="modal-height-limit"
+            />
+          </Modal.Body>
+        </Modal>
+      </>
+    )
+  }
+
+
+
   const handleCompetitionFilter = partial(handleFilter, competitionData, setCompetitionRecords, "Gewinner", "Verlierer")
   const handleSongFilter = partial(handleFilter, songData, setSongRecords, "Liedanfang", "")
 
@@ -195,7 +291,7 @@ function App() {
   }
 
   async function get_competition_history() {
-    fetch("/api/load_csv_as_dataframe/vergleiche.csv").then(
+    fetch("/api/load_competition_history").then(
       res => {
         if (res.ok) {
           return res.json()
@@ -250,7 +346,7 @@ function App() {
   }, [])
 
   return (
-    <Container>
+    <Container fluid="md">
       <Tabs
         defaultActiveKey="competition"
         id=""
