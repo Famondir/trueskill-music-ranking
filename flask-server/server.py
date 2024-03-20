@@ -3,12 +3,18 @@ from flask import request
 import pandas as pd
 import trueskillthroughtime as ttt
 import datetime
+import os.path
 
 
 def generate_song_rating():
     songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
     songlist.insert(1, "Wertung", pd.NA, True)
     songlist.insert(2, "Unsicherheit", ttt.SIGMA, True)
+    songlist["BildExistiert"] = songlist["Liedanfang"].map(
+        lambda x: os.path.isfile(
+            "../client/public/images/songs/"+x.lower().replace(" ", "_").replace(",", "").replace("'", "")+".png"
+            )
+        )
     
     competition_history = pd.read_csv("../trueskill_tt/vergleiche.csv")
     comp =  [[[gewinner], [verlierer]] for gewinner, verlierer 

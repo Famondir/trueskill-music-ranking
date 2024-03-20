@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import DataTable from 'react-data-table-component';
-import imageExists from "image-exists"
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './custom.css';
@@ -78,14 +77,16 @@ function App() {
     {
       name: 'Noten',
       selector: row => row.Liedanfang,
-      cell: row => BildModal(row.Liedanfang),
-      button: true,
+      cell: row => BildModal(row.Liedanfang, row.BildExistiert),
+      //button: true,
+      width: "7rem"
     },
     {
       name: 'Video',
       selector: row => row.Videolink,
       cell: row => VideoModal(row.Liedanfang, row.Videolink),
-      button: true,
+      //button: true,
+      width: "7rem"
     },
   ];
 
@@ -122,7 +123,6 @@ function App() {
     const handleShow = () => setShow(true);
 
     const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
-    // const image_src = "file:///C:/Users/schaefes/Documents/GitHub/pairwise_ranker/client/public/images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
 
     return (
       <>
@@ -214,7 +214,7 @@ function App() {
     )
   }
 
-  function BildModal(lied) {
+  function BildModal(lied, bild_existiert) {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
@@ -222,18 +222,9 @@ function App() {
 
     const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
 
-    const image_exists = imageExists(image_src, function(exists) {
-      if (exists) {
-        return true;
-      }
-      else {
-        return false;
-      }
-    });
-
     return (
       <>
-        {(!image_exists) ? (
+        {(!bild_existiert) ? (
           <Button href="#" onClick={handleShow} disabled>Noten</Button>
         ) : (
           <Button href="#" onClick={handleShow}>Noten</Button>
@@ -242,7 +233,7 @@ function App() {
         <Modal
             show={show}
             onHide={handleClose}
-            size="lg"
+            size="xl"
           >
           <Modal.Header closeButton>
             <Modal.Title>{lied}</Modal.Title>
