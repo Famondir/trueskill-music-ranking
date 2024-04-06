@@ -5,16 +5,23 @@ import trueskillthroughtime as ttt
 import datetime
 import os.path
 
+def simplify_string(s):
+    return s.lower().replace(" ", "_").replace(",", "").replace("'", "")
 
 def generate_song_rating():
     songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
     songlist.insert(1, "Wertung", pd.NA, True)
     songlist.insert(2, "Unsicherheit", ttt.SIGMA, True)
-    songlist["BildExistiert"] = songlist["Liedanfang"].map(
+    songlist["BildExistiert"] = songlist.apply(
         lambda x: os.path.isfile(
-            "../client/public/images/songs/"+x.lower().replace(" ", "_").replace(",", "").replace("'", "")+".png"
-            )
-        )
+            "../client/public/images/songs/"+
+                simplify_string(x["Quelle"])+
+                "/"+
+                simplify_string(x["Liedanfang"])+
+                ".png"
+            ),
+        axis=1
+    )
     
     competition_history = pd.read_csv("../trueskill_tt/vergleiche.csv")
     comp =  [[[gewinner], [verlierer]] for gewinner, verlierer 

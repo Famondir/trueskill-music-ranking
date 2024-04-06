@@ -77,7 +77,7 @@ function App() {
     {
       name: 'Noten',
       selector: row => row.Liedanfang,
-      cell: row => BildModal(row.Liedanfang, row.BildExistiert),
+      cell: row => BildModal(row.Liedanfang, row.Quelle, row.BildExistiert),
       //button: true,
       width: "7rem"
     },
@@ -106,6 +106,18 @@ function App() {
 
   const partial = (func, ...args) => (...rest) => func(...args, ...rest);
 
+  function simplify_string(s) {
+    return s.toLowerCase().replaceAll(" ", "_").replaceAll(/[',]/g, "").replaceAll(" ", "_");
+  }
+
+  function get_image_source(lied, quelle) {
+    return "images/songs/"+
+      simplify_string(quelle)+
+      "/"+
+      simplify_string(lied)+
+      ".png";
+  }
+
   function handleFilter(data, setData, row_name_1, row_name_2, event) {
     const newData = data.filter(row => {
       return (
@@ -122,7 +134,7 @@ function App() {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
+    const image_src = get_image_source(lied, quelle);
 
     return (
       <>
@@ -214,13 +226,13 @@ function App() {
     )
   }
 
-  function BildModal(lied, bild_existiert) {
+  function BildModal(lied, quelle, bild_existiert) {
     const [show, setShow] = useState(false);
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
-    const image_src = "images/songs/"+lied.toLowerCase().replaceAll(/[',]/g, "").replaceAll(" ", "_")+".png";
+    const image_src = get_image_source(lied, quelle);
 
     return (
       <>
