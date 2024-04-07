@@ -283,8 +283,8 @@ function App() {
       }
     ).then(
       data => {
-        setData(data)
         // console.log(data)
+        setData(data)
       }
     ).then(
       get_song_rating()
