@@ -4,12 +4,19 @@ import pandas as pd
 import trueskillthroughtime as ttt
 import datetime
 import os.path
+import glob
 
 def simplify_string(s):
     return s.lower().replace(" ", "_").replace(",", "").replace("'", "")
 
 def generate_song_rating():
-    songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
+    path = "..\\songdata"
+    filenames = glob.glob(path + "/*.csv")
+    dataframes = [pd.read_csv(filename) for filename in filenames]
+    songlist = pd.concat(dataframes, ignore_index=True)
+    # print(songlist)
+    
+    # songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
     songlist.insert(1, "Wertung", pd.NA, True)
     songlist.insert(2, "Unsicherheit", ttt.SIGMA, True)
     songlist["BildExistiert"] = songlist.apply(
