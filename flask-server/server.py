@@ -47,9 +47,9 @@ def generate_song_rating():
 
 
 def generate_competition_queue():
-    sorted_songlist = songlist.sort_values(by=["Unsicherheit"], ascending=False)
-    # print(competition_list.iloc[0:5, 0:3])
+    sorted_songlist = songlist[songlist['Bewerten'] == 1].sort_values(by=["Unsicherheit"], ascending=False)
     competition_list = sorted_songlist[["Liedanfang", "Quelle"]].apply(lambda x: x["Liedanfang"]+"@"+x["Quelle"], axis=1).to_list()
+    # print(competition_list)
     competition_list_1 = [title for idx, title in enumerate(competition_list) if idx%2 == 0]
     competition_list_2 = [title for idx, title in enumerate(competition_list) if idx%2 == 1]
     competition_queue = list(zip(competition_list_1, competition_list_2))  # drops entries if one list is longer

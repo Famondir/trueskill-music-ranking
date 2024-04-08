@@ -14,6 +14,7 @@ import CardBody from "react-bootstrap/esm/CardBody";
 import Table from 'react-bootstrap/Table';
 import Modal from 'react-bootstrap/Modal';
 import Image from 'react-bootstrap/Image';
+import Form from 'react-bootstrap/Form';
 
 
 function App() {
@@ -78,15 +79,20 @@ function App() {
       name: 'Noten',
       selector: row => row.Liedanfang,
       cell: row => BildModal(row.Liedanfang, row.Quelle, row.BildExistiert),
-      //button: true,
       width: "7rem"
     },
     {
       name: 'Video',
       selector: row => row.Videolink,
       cell: row => VideoModal(row.Liedanfang, row.Videolink),
-      //button: true,
       width: "7rem"
+    },
+    {
+      name: '★',
+      selector: row => row.Bewerten,
+      cell: row => RateCheckbox(row.Bewerten),
+      sortable: true,
+      width: "5rem"
     },
   ];
 
@@ -263,6 +269,18 @@ function App() {
     )
   }
 
+
+  function RateCheckbox(bewerten) {
+    return (
+      <Form>
+        <Form.Check
+        disabled
+        type='checkbox'
+        checked={bewerten}
+        ></Form.Check>
+      </Form>
+    )
+  }
 
 
   const handleCompetitionFilter = partial(handleFilter, competitionData, setCompetitionRecords, "Gewinner", "Verlierer")
