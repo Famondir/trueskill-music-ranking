@@ -152,7 +152,7 @@ function App() {
           <Button
             variant="primary"
             size="lg"
-            onClick={() => post_winner(lied)}
+            onClick={() => post_winner(lied+"@"+quelle)}
             >
             {lied}
           </Button>
