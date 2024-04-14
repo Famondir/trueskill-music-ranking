@@ -45,28 +45,31 @@ def generate_song_rating():
     
     return songlist
 
-
 def generate_competition_queue():
     sorted_songlist = songlist[songlist['Bewerten'] == 1].sort_values(by=["Unsicherheit"], ascending=False)
     competition_list = sorted_songlist[["Liedanfang", "Quelle"]].apply(lambda x: x["Liedanfang"]+"@"+x["Quelle"], axis=1).to_list()
     # print(competition_list)
     competition_list_1 = [title for idx, title in enumerate(competition_list) if idx%2 == 0]
     competition_list_2 = [title for idx, title in enumerate(competition_list) if idx%2 == 1]
+    global competition_queue
     competition_queue = list(zip(competition_list_1, competition_list_2))  # drops entries if one list is longer
     # print(competition_queue[-5:])
-    return competition_queue
+    #return competition_queue
 
 
 songlist = generate_song_rating()
-competition_queue = generate_competition_queue()
+competition_queue = list()
+generate_competition_queue()
 
 
 app = Flask(__name__)
 
 
-""" @app.route("/api/load_csv_as_dataframe/<string:filename>")
-def read_csv_as_dataframe(filename):
-    return pd.read_csv("../trueskill_tt/"+filename).to_json(orient='records') """
+@app.route("/api/reset_competition_queue")
+def reset_competition_queue():
+    generate_competition_queue()
+    return get_next_competition(), 201
+
 
 @app.route("/api/load_competition_history")
 def read_csv_as_dataframe():
@@ -95,6 +98,11 @@ def declare_competition_winner():
     competition_history.to_csv("../trueskill_tt/vergleiche2.csv", index=False)
     return get_next_competition(), 201
 
+
+@app.route('/api/skip_competition')
+def skip_competition():
+    competition_queue.pop(0)
+    return get_next_competition(), 201
 
 if __name__ == "__main__":
     app.run(debug=True)

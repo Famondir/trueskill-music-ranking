@@ -15,6 +15,7 @@ import Table from 'react-bootstrap/Table';
 import Modal from 'react-bootstrap/Modal';
 import Image from 'react-bootstrap/Image';
 import Form from 'react-bootstrap/Form';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 
 function App() {
@@ -311,6 +312,36 @@ function App() {
     )
   }
 
+  async function skip_competition() {
+    fetch("api/skip_competition").then(
+      res => {
+        if (res.ok) {
+          return res.json()
+        }
+      }
+    ).then(
+      data => {
+        // console.log(data)
+        setData(data)
+      }
+    )
+  }
+
+  async function reset_competition_queue() {
+    fetch("api/reset_competition_queue").then(
+      res => {
+        if (res.ok) {
+          return res.json()
+        }
+      }
+    ).then(
+      data => {
+        // console.log(data)
+        setData(data)
+      }
+    )
+  }
+
   async function get_competition_history() {
     fetch("/api/load_competition_history").then(
       res => {
@@ -395,8 +426,23 @@ function App() {
                     video_src={lied[1].Videolink}
                   />
                 </CardGroup>
+                <ButtonGroup aria-label="Basic example">
+                  <Button
+                    variant="outline-primary"
+                    size="lg"
+                    onClick={() => skip_competition()}
+                    >
+                    {"Überspringen"}
+                  </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="lg"
+                    onClick={() => reset_competition_queue()}
+                    >
+                    {"Vergleiche neu bestimmen"}
+                  </Button>
+                </ButtonGroup>
               </div>
-
             )}
 
           </Row>
