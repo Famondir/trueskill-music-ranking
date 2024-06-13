@@ -426,7 +426,7 @@ function App() {
                     video_src={lied[1].Videolink}
                   />
                 </CardGroup>
-                <ButtonGroup aria-label="Basic example">
+                <ButtonGroup aria-label="Basic example" className="mt-2">
                   <Button
                     variant="outline-primary"
                     size="lg"

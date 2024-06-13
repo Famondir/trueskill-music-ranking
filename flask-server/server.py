@@ -34,7 +34,7 @@ def generate_song_rating():
     comp =  [[[gewinner], [verlierer]] for gewinner, verlierer 
              in zip(competition_history["Gewinner"], competition_history["Verlierer"])]
     times = competition_history["Datum"].map(lambda string: 
-        (datetime.date.today()-datetime.datetime.strptime(string, "%Y-%m-%d").date()).days).to_list()
+        (datetime.date.today()-datetime.datetime.strptime(string, "%Y-%m-%d").date()).days//30).to_list()
     
     h = ttt.History(comp, times=times, gamma=0.1)
     h.convergence()
@@ -46,6 +46,8 @@ def generate_song_rating():
     return songlist
 
 def generate_competition_queue():
+    global songlist
+    songlist = generate_song_rating()
     sorted_songlist = songlist[songlist['Bewerten'] == 1].sort_values(by=["Unsicherheit"], ascending=False)
     competition_list = sorted_songlist[["Liedanfang", "Quelle"]].apply(lambda x: x["Liedanfang"]+"@"+x["Quelle"], axis=1).to_list()
     # print(competition_list)
@@ -57,7 +59,7 @@ def generate_competition_queue():
     #return competition_queue
 
 
-songlist = generate_song_rating()
+songlist = list()
 competition_queue = list()
 generate_competition_queue()
 
