@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import DataTable from 'react-data-table-component';
+import DataTable2 from 'react-data-table-component';
+
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import "primereact/resources/themes/lara-light-indigo/theme.css";  // theme
+import "primereact/resources/primereact.min.css";                  // core css
+import "primeicons/primeicons.css";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './custom.css';
@@ -114,7 +120,11 @@ function App() {
   const partial = (func, ...args) => (...rest) => func(...args, ...rest);
 
   function simplify_string(s) {
-    return s.toLowerCase().replaceAll(" ", "_").replaceAll(/[',]/g, "").replaceAll(" ", "_");
+    if (typeof(s) === 'string') {
+      return s.toLowerCase().replaceAll(" ", "_").replaceAll(/[',]/g, "").replaceAll(" ", "_")
+    } else{
+      return s
+    }
   }
 
   function get_image_source(lied, quelle) {
@@ -454,17 +464,47 @@ function App() {
               <p>Loading...</p>
             ) : (
               <div>
+                {/*}
                 <div>
                   <span>Suche Lied: </span><input type="text" onChange={handleSongFilter}></input>
-                </div>
-                <DataTable
+                </div>                              
+                <DataTable2
                   columns={songColumns}
                   data={songRecords}
                   customStyles={customStyles}
                   theme="light"
                   fixedHeader
                   pagination
-                ></DataTable>
+                ></DataTable2> */}
+                <DataTable 
+                  value={songRecords} 
+                  paginator 
+                  rows={10} 
+                  rowsPerPageOptions={[5, 10, 20]}
+                  tableStyle={{ minWidth: '50rem' }}
+                  stripedRows
+                  showGridlines
+                  filterDisplay="menu"
+                >
+                  <Column field="Liedanfang" header="Lied" sortable 
+                    filter
+                    filterPlaceholder="Suche Lied"
+                    style={{ width: '20%' }}
+                  ></Column>
+                  <Column field="Wertung" header="Wertung" sortable></Column>
+                  <Column field="Unsicherheit" header="Unsicherheit" sortable></Column>
+                  <Column field="Quelle" header="Quelle" sortable
+                    filter
+                    filterPlaceholder="Wähle Quellen"
+                    style={{ width: '15%' }}
+                  ></Column>
+                  <Column field="Seite" header="Seite" sortable></Column>
+                  <Column field="Liedanfang" header="Noten" body={(rowData) => BildModal(rowData.Liedanfang, rowData.Quelle, rowData.BildExistiert)}></Column>
+                  <Column field="Videolink" header="Video" body={(rowData) => VideoModal(rowData.Liedanfang, rowData.Videolink)}></Column>
+                  <Column field="Bewerten" header="★" body={(rowData) => RateCheckbox(rowData.Bewerten)}
+                    filter
+                  ></Column>   
+                  </DataTable>
               </div>
             )}
 
@@ -480,14 +520,14 @@ function App() {
                 <div>
                   <span>Suche Lied: </span><input type="text" onChange={handleCompetitionFilter}></input>
                 </div>
-                <DataTable
+                <DataTable2
                   columns={competitionColumns}
                   data={competitionRecords}
                   customStyles={customStyles}
                   theme="light"
                   fixedHeader
                   pagination
-                ></DataTable>
+                ></DataTable2>
               </div>
             )}
 

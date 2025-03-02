@@ -1,27 +1,29 @@
-from flask import Flask
-from flask import request
+from flask import Flask, request
 import pandas as pd
 import trueskillthroughtime as ttt
 import datetime
-import os.path
+import os
 import glob
+
+relative_path_prefix = "./"
 
 def simplify_string(s):
     return s.lower().replace(" ", "_").replace(",", "").replace("'", "")
 
 def generate_song_rating():
-    path = "..\\songdata"
+    path = relative_path_prefix+"songdata"
+    # print('getcwd:      ', os.getcwd())
     filenames = glob.glob(path + "/*.csv")
     dataframes = [pd.read_csv(filename) for filename in filenames]
     songlist = pd.concat(dataframes, ignore_index=True)
     # print(songlist)
     
-    # songlist = pd.read_csv("../trueskill_tt/liederliste.csv")
+    # songlist = pd.read_csv(relative_path_prefix+"trueskill_tt/liederliste.csv")
     songlist.insert(1, "Wertung", pd.NA, True)
     songlist.insert(2, "Unsicherheit", ttt.SIGMA, True)
     songlist["BildExistiert"] = songlist.apply(
         lambda x: os.path.isfile(
-            "../client/public/images/songs/"+
+            relative_path_prefix+"client/public/images/songs/"+
                 simplify_string(x["Quelle"])+
                 "/"+
                 simplify_string(x["Liedanfang"])+
@@ -30,7 +32,7 @@ def generate_song_rating():
         axis=1
     )
     
-    competition_history = pd.read_csv("../trueskill_tt/vergleiche2.csv")
+    competition_history = pd.read_csv(relative_path_prefix+"trueskill_tt/vergleiche2.csv")
     comp =  [[[gewinner], [verlierer]] for gewinner, verlierer 
              in zip(competition_history["Gewinner"], competition_history["Verlierer"])]
     times = competition_history["Datum"].map(lambda string: 
@@ -75,7 +77,7 @@ def reset_competition_queue():
 
 @app.route("/api/load_competition_history")
 def read_csv_as_dataframe():
-    competition_history = pd.read_csv("../trueskill_tt/vergleiche2.csv").iloc[::-1]
+    competition_history = pd.read_csv(relative_path_prefix+"trueskill_tt/vergleiche2.csv").iloc[::-1]
     return competition_history.to_json(orient='records')
 
 
@@ -95,9 +97,9 @@ def declare_competition_winner():
     winner = request.get_json()
     last_competition = competition_queue.pop(0)
     winner_index = 0 if last_competition[0] == winner else 1
-    competition_history = pd.read_csv("../trueskill_tt/vergleiche2.csv")
+    competition_history = pd.read_csv(relative_path_prefix+"trueskill_tt/vergleiche2.csv")
     competition_history.loc[len(competition_history)] = [datetime.date.today().strftime("%Y-%m-%d"), last_competition[winner_index], last_competition[not winner_index]]
-    competition_history.to_csv("../trueskill_tt/vergleiche2.csv", index=False)
+    competition_history.to_csv(relative_path_prefix+"trueskill_tt/vergleiche2.csv", index=False)
     return get_next_competition(), 201
 
 
