@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import DataTable2 from 'react-data-table-component';
 
 import { DataTable } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
+import { Button as Button2 } from 'primereact/button';
 import { Column } from 'primereact/column';
 import "primereact/resources/themes/lara-light-indigo/theme.css";  // theme
 import "primereact/resources/primereact.min.css";                  // core css
@@ -31,6 +33,7 @@ function App() {
 
   const [songData, setSongData] = useState()
   const [songRecords, setSongRecords] = useState()
+  const [uniqueSources, setUniqueSources] = useState([]);
 
   const [lied, setData] = useState([])
 
@@ -134,6 +137,12 @@ function App() {
       simplify_string(lied)+
       ".png";
   }
+
+  const getUniqueSources = (data) => {
+    if (!data) return [];
+    const sources = [...new Set(data.map(item => item.Quelle))];
+    return sources.map(source => ({ label: source, value: source }));
+  };
 
   function handleFilter(data, setData, row_name_1, row_name_2, event) {
     const newData = data.filter(row => {
@@ -379,6 +388,7 @@ function App() {
       data => {
         setSongData(data)
         setSongRecords(data)
+        setUniqueSources(getUniqueSources(data))
         // console.log(data)
       }
     )
@@ -493,17 +503,63 @@ function App() {
                   ></Column>
                   <Column field="Wertung" header="Wertung" sortable></Column>
                   <Column field="Unsicherheit" header="Unsicherheit" sortable></Column>
-                  <Column field="Quelle" header="Quelle" sortable
-                    filter
-                    filterPlaceholder="Wähle Quellen"
+                  <Column 
+                    field="Quelle" 
+                    header="Quelle" 
+                    sortable
+                    filter 
+                    filterMatchMode="equals"
+                    showFilterMatchModes={false}
+                    showAddButton={false}
+                    showFilterOperator={false}
+                    filterElement={(options) => (
+                      <Dropdown
+                        value={options.value}
+                        options={uniqueSources}
+                        onChange={(e) => options.filterCallback(e.value)}
+                        placeholder="Wähle Quellen"
+                        className="p-column-filter"
+                      />
+                    )}
                     style={{ width: '15%' }}
                   ></Column>
                   <Column field="Seite" header="Seite" sortable></Column>
                   <Column field="Liedanfang" header="Noten" body={(rowData) => BildModal(rowData.Liedanfang, rowData.Quelle, rowData.BildExistiert)}></Column>
                   <Column field="Videolink" header="Video" body={(rowData) => VideoModal(rowData.Liedanfang, rowData.Videolink)}></Column>
-                  <Column field="Bewerten" header="★" body={(rowData) => RateCheckbox(rowData.Bewerten)}
+                  <Column 
+                    field="Bewerten" 
+                    header="★" 
+                    body={(rowData) => RateCheckbox(rowData.Bewerten)}
                     filter
-                  ></Column>   
+                    filterMatchMode="equals"
+                    showFilterMatchModes={false}
+                    showAddButton={false}
+                    showFilterOperator={false}
+                    filterValue="1"
+                    filterElement={(options) => (
+                      <div className="flex align-items-center gap-2">
+                        <Button2
+                          type="button"
+                          label="Alle"
+                          onClick={() => options.filterCallback(null)}
+                          className={options.value === null ? 'p-button-outlined' : 'p-button-text'}
+                        />
+                        <Button2
+                          type="button"
+                          label="✓"
+                          onClick={() => options.filterCallback(1)}
+                          className={options.value === true ? 'p-button-outlined' : 'p-button-text'}
+                        />
+                        <Button2
+                          type="button"
+                          label="✗"
+                          onClick={() => options.filterCallback(0)}
+                          className={options.value === false ? 'p-button-outlined' : 'p-button-text'}
+                        />
+                      </div>
+                    )}
+                    style={{ width: '8%' }}
+                  ></Column> 
                   </DataTable>
               </div>
             )}
