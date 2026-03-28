@@ -10,6 +10,7 @@
     "react-bootstrap": "^2.10.1",
     "react-data-table-component": "^7.6.2",
     "react-dom": "^18.2.0",
+    "react-force-graph-2d": "^1.29.1",
     "styled-components": "^6.1.8"
   },
   "devDependencies": {

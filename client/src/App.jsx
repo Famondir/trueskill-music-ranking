@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import DataTable2 from 'react-data-table-component';
+import NetworkGraph from './NetworkGraph';
 
 import { DataTable } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
@@ -306,6 +307,7 @@ function App() {
   const [uniqueSources, setUniqueSources] = useState({});
 
   const [currentPair, setCurrentPair] = useState([]);
+  const [networkData, setNetworkData] = useState(null);
 
   // ---- helpers that depend on config ----
 
@@ -358,6 +360,12 @@ function App() {
       .then(data => { if (data) setCurrentPair(data); });
   }, []);
 
+  const get_network_data = useCallback(() => {
+    fetch("/api/network_data")
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data) setNetworkData(data); });
+  }, []);
+
   async function post_winner(key) {
     fetch("/api/declare_competition_winner", {
       method: "POST",
@@ -404,7 +412,8 @@ function App() {
     get_item_rating();
     get_competition_history();
     get_first_competition();
-  }, [appConfig, get_item_rating, get_competition_history, get_first_competition]);
+    get_network_data();
+  }, [appConfig, get_item_rating, get_competition_history, get_first_competition, get_network_data]);
 
   // ---- Competition history table columns (always fixed) ----
 
@@ -425,7 +434,7 @@ function App() {
     return <Container fluid="md"><p>Loading configuration…</p></Container>;
   }
 
-  const { app: appLabels, item: itemCfg } = appConfig;
+  const { app: appLabels, item: itemCfg, network: networkCfg = {} } = appConfig;
 
   return (
     <Container fluid="md">
@@ -502,6 +511,13 @@ function App() {
                 />
               </div>
             )}
+          </Row>
+        </Tab>
+
+        {/* ---- Network tab ---- */}
+        <Tab eventKey="network" title={networkCfg.tab_label || "Network"}>
+          <Row id="networkGraph">
+            <NetworkGraph networkData={networkData} />
           </Row>
         </Tab>
 

@@ -90,3 +90,9 @@ item:
       label: "Quelle"
     - field: "Seite"
       label: "Seite"
+
+network:
+  # Label for the network graph tab
+  tab_label: "Network"
+  # Which key field determines node color (group). Defaults to the last key field.
+  group_field: "Quelle"

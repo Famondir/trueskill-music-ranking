@@ -140,6 +140,7 @@ def get_frontend_config():
         {
             "app": app_config["app"],
             "item": app_config["item"],
+            "network": app_config.get("network", {}),
         }
     )
 
@@ -193,6 +194,47 @@ def declare_competition_winner():
 def skip_competition():
     competition_queue.pop(0)
     return get_next_competition(), 201
+
+
+@app.route("/api/network_data")
+def get_network_data():
+    """Return graph nodes and edges for the network visualisation."""
+    cfg = app_config
+    competition_file = os.path.join(PROJECT_ROOT, cfg["data"]["competition_file"])
+    history = pd.read_csv(competition_file)
+
+    sep = cfg["item"]["key_separator"]
+    key_fields = cfg["item"]["key_fields"]
+    display_field = cfg["item"]["display_name_field"]
+    group_field = cfg.get("network", {}).get("group_field", key_fields[-1])
+
+    all_ids = pd.concat([history["Gewinner"], history["Verlierer"]]).unique()
+    nodes = []
+    for node_id in all_ids:
+        parts = node_id.split(sep, len(key_fields) - 1)
+        fields = {
+            key_fields[i]: parts[i] if i < len(parts) else ""
+            for i in range(len(key_fields))
+        }
+        nodes.append(
+            {
+                "id": node_id,
+                "label": fields.get(display_field, node_id),
+                "group": fields.get(group_field, ""),
+            }
+        )
+
+    edges = [
+        {
+            "id": i,
+            "source": row["Gewinner"],
+            "target": row["Verlierer"],
+            "date": row["Datum"],
+        }
+        for i, row in history.iterrows()
+    ]
+
+    return jsonify({"nodes": nodes, "edges": edges})
 
 
 if __name__ == "__main__":
