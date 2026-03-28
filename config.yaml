@@ -1,0 +1,92 @@
+# ============================================================
+#  Ranking App Configuration
+#  Adjust this file to rank any kind of items, not just songs.
+# ============================================================
+
+app:
+  title: "LARP Lieder Ranking"
+  comparison_question: "Welches Lied gefällt Dir besser?"
+  skip_button_label: "Überspringen"
+  reset_button_label: "Vergleiche neu bestimmen"
+  tab_competition: "Rate next!"
+  tab_ranking: "Song rating"
+  tab_history: "Rating history"
+  history_search_label: "Suche Lied"
+
+data:
+  # Directory containing CSV files with items to rank (relative to project root)
+  items_dir: "songdata"
+  # CSV file storing head-to-head comparison results
+  competition_file: "trueskill_tt/vergleiche2.csv"
+  # Field in item CSVs that marks an item as eligible for ranking (1 = yes, 0 = no)
+  rate_field: "Bewerten"
+
+item:
+  # --- Identity ---
+  # Fields whose combined values uniquely identify an item
+  key_fields:
+    - "Liedanfang"
+    - "Quelle"
+  # Separator used when joining key fields into a single string ID
+  key_separator: "@"
+  # Field used as the human-readable primary label (button text, modal title, etc.)
+  display_name_field: "Liedanfang"
+
+  # --- Optional image support ---
+  image:
+    enabled: true
+    # Path template relative to client/public/. Placeholders use key_field names.
+    path_template: "images/songs/{Quelle}/{Liedanfang}.png"
+    # Apply slug transformation (lowercase, spaces→underscores) to placeholder values
+    slugify: true
+    # Base directory to check for file existence on the server side.
+    # Set to null/empty to skip the server-side check (e.g. when running in Docker
+    # and images are only in the frontend container).
+    server_check_base_path: "client/public/"
+    button_label: "Noten"
+
+  # --- Optional video/embed support ---
+  video:
+    enabled: true
+    # Field in the item CSV that holds a video embed URL
+    field: "Videolink"
+    no_video_label: "Kein Videolink bereitgestellt."
+
+  # --- Ranking table columns ---
+  # Special types: "image", "video", "checkbox"
+  # filter_type: "text" | "dropdown" | "boolean"
+  table_columns:
+    - field: "Liedanfang"
+      header: "Lied"
+      sortable: true
+      filter_type: "text"
+    - field: "Wertung"
+      header: "Wertung"
+      sortable: true
+    - field: "Unsicherheit"
+      header: "Unsicherheit"
+      sortable: true
+    - field: "Quelle"
+      header: "Quelle"
+      sortable: true
+      filter_type: "dropdown"
+    - field: "Seite"
+      header: "Seite"
+      sortable: true
+    - type: "image"
+      header: "Noten"
+    - type: "video"
+      header: "Video"
+    - field: "Bewerten"
+      header: "★"
+      sortable: true
+      type: "checkbox"
+      filter_type: "boolean"
+
+  # --- Comparison card detail rows ---
+  # Fields shown in the info table inside each comparison card
+  card_fields:
+    - field: "Quelle"
+      label: "Quelle"
+    - field: "Seite"
+      label: "Seite"

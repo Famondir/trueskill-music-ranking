@@ -1,0 +1,26 @@
+# Backend — Flask / Python
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY flask-server/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY flask-server/server.py ./flask-server/server.py
+COPY config.yaml .
+
+# Data dirs are mounted at runtime via docker-compose volumes so that
+# rankings persist without rebuilding the image.
+# If you prefer baking the data in, uncomment the two lines below:
+# COPY songdata/ ./songdata/
+# COPY trueskill_tt/ ./trueskill_tt/
+
+EXPOSE 5000
+
+# Run with gunicorn in production; fall back to flask for development
+ENV FLASK_HOST=0.0.0.0
+ENV FLASK_PORT=5000
+
+CMD ["python", "flask-server/server.py"]
